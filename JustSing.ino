@@ -18,7 +18,8 @@ int RGB_CHANNEL[] = {
   28, 29, 30
 };
 
-byte* rgb = (byte*) malloc (3 * 10);
+float newRGB[10 * 3];
+float currentRGB[10 * 3];
 
 byte blinkCount = 0;
 
@@ -65,9 +66,9 @@ void readRGB()
     {
       for(int index = 0; index < RGB_LEN; index++)
       {
-        rgb[(index * 3) + 0] = Serial.read();
-        rgb[(index * 3) + 1] = Serial.read();
-        rgb[(index * 3) + 2] = Serial.read();
+        newRGB[(index * 3) + 0] = ((float)Serial.read()) / 255.0;
+        newRGB[(index * 3) + 1] = ((float)Serial.read()) / 255.0;
+        newRGB[(index * 3) + 2] = ((float)Serial.read()) / 255.0;
       }
       return;
     }
@@ -81,10 +82,10 @@ void updateTLC()
 
   for(int index = 0; index < RGB_LEN; index++)
   {
-    float r = rgb[(index * 3) + 0] / 255.0;
-    float g = rgb[(index * 3) + 1] / 255.0;
-    float b = rgb[(index * 3) + 2] / 255.0;
-    setRGB(index, r, g, b);
+    currentRGB[(index * 3) + 0] += (newRGB[(index * 3) + 0] - currentRGB[(index * 3) + 0]) * 0.3;
+    currentRGB[(index * 3) + 1] += (newRGB[(index * 3) + 1] - currentRGB[(index * 3) + 1]) * 0.3;
+    currentRGB[(index * 3) + 2] += (newRGB[(index * 3) + 2] - currentRGB[(index * 3) + 2]) * 0.3;
+    setRGB(index, currentRGB[(index * 3) + 0], currentRGB[(index * 3) + 1], currentRGB[(index * 3) + 2]);
   }    
   
   while(Tlc.update())
