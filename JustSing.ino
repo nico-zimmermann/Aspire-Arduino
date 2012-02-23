@@ -2,6 +2,7 @@
 
 int ERROR_OK_NOT_ZERO[3] = {1, 5, 5};
 
+int SPECTRUM_SIZE = 32;
 int RGB_LEN = 10;
 
 int RGB_CHANNEL[] = {
@@ -37,22 +38,22 @@ void loop()
 {
   blinkCount = 0;
   digitalWrite(13, blinkColor());
+  
   readRGB();
   sendOk();
-  updateTLC();  
-  return;
+  updateTLC();
 }
 
-void waitOk()
+void readOk()
 { 
-  boolean missingHandshake = true;
-  while(missingHandshake)
+  boolean waiting = true;
+  while(waiting)
   {
     if (Serial.available() == 1)
     {
         if (Serial.read() != 0)
 	  loopError(ERROR_OK_NOT_ZERO);
-	missingHandshake = false;      
+	waiting = false;      
     }
     delay(1);
   }
@@ -82,10 +83,10 @@ void updateTLC()
 
   for(int index = 0; index < RGB_LEN; index++)
   {
-    currentRGB[(index * 3) + 0] += (newRGB[(index * 3) + 0] - currentRGB[(index * 3) + 0]) * 0.3;
-    currentRGB[(index * 3) + 1] += (newRGB[(index * 3) + 1] - currentRGB[(index * 3) + 1]) * 0.3;
-    currentRGB[(index * 3) + 2] += (newRGB[(index * 3) + 2] - currentRGB[(index * 3) + 2]) * 0.3;
-    setRGB(index, currentRGB[(index * 3) + 0], currentRGB[(index * 3) + 1], currentRGB[(index * 3) + 2]);
+    //currentRGB[(index * 3) + 0] += (newRGB[(index * 3) + 0] - currentRGB[(index * 3) + 0]) * 0.3;
+    //currentRGB[(index * 3) + 1] += (newRGB[(index * 3) + 1] - currentRGB[(index * 3) + 1]) * 0.3;
+    //currentRGB[(index * 3) + 2] += (newRGB[(index * 3) + 2] - currentRGB[(index * 3) + 2]) * 0.3;
+    setRGB(index, newRGB[(index * 3) + 0], newRGB[(index * 3) + 1], newRGB[(index * 3) + 2]);
   }    
   
   while(Tlc.update())
@@ -97,6 +98,14 @@ void updateTLC()
 void sendOk()
 {
   Serial.write((byte)0);
+}
+
+void sendSpectrum()
+{
+  for(int i = 0; i < SPECTRUM_SIZE; i++)
+  {
+    Serial.write(0.5 * (analogRead(A1) - 100) );
+  }    
 }
 
 float sin2(float rad)
